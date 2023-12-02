@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  bankomat-app:
+    container_name: bankomat-app
+    image: bankomat-app:0.1
+    build:
+      context: .
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/bankomat-app
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=admin
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+
+  db:
+    container_name: database-postgresql
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: bankomat-app
+      POSTGRES_SCHEME: postgres
+    ports:
+      - "5432:5432"
+
+  pgadmin:
+    container_name: database-admin
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"

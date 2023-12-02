@@ -1,0 +1,47 @@
+logging:
+  pattern:
+    console: '{"timestamp":"%clr(%d{dd-MM-yyyy HH:mm:ss.SSS})", "level":"%clr(%p)", "message":"%clr(%m)", "source":"%clr(%logger{0})", "thread":"%clr([%t])"}%n'
+    file: '{"timestamp":"%clr(%d{dd-MM-yyyy HH:mm:ss.SSS})", "level":"%clr(%p)", "message":"%clr(%m)", "source":"%clr(%logger{0})", "thread":"%clr([%t])"}%n'
+  level:
+    liquibase: INFO
+
+camunda.bpm.admin-user:
+  id: admin
+  password: admin
+
+server:
+  port: 8080
+
+spring:
+  application:
+    name: "Bankomat Backend For Frontend Application"
+
+  main:
+    allow-bean-definition-overriding: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bankomat-app
+    username: admin
+    password: admin
+#      hikari:
+#        schema: postgres
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+  properties:
+    hibernate:
+      jdbc:
+        lob:
+          non_contextual_creation: true
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
+  liquibase:
+    change-log: classpath:/db/db-changelog-master.xml
+    contexts: test
+    parameters:
+      key: bankomat-bff

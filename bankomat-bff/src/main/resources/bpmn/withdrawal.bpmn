@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0fr9mxs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+  <bpmn:process id="Withdrawal" name="Withdrawal Process" isExecutable="true" camunda:versionTag="1.0.0" camunda:historyTimeToLive="180">
+    <bpmn:startEvent id="start" name="Start">
+      <bpmn:outgoing>SequenceFlow_1fp17al</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="SequenceFlow_1fp17al" sourceRef="start" targetRef="CheckAccountBalance" />
+    <bpmn:endEvent id="end" name="End">
+      <bpmn:incoming>Flow_0l3g749</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="CheckAccountBalance" name="Check account balance" camunda:expression="${accountServiceImpl.checkAccountBalance(accountId, amount)}" camunda:resultVariable="isBalanceOk">
+      <bpmn:incoming>SequenceFlow_1fp17al</bpmn:incoming>
+      <bpmn:outgoing>Flow_047841h</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="CreateAccountTransactionRecord" name="Create Account Transaction Record" camunda:expression="${accountServiceImpl.createAccountTransaction(transactionId, accountId, atmId, amount, responseStatus)}" camunda:resultVariable="withdrawalResponse">
+      <bpmn:incoming>Flow_0qdtvek</bpmn:incoming>
+      <bpmn:outgoing>Flow_0efb5mx</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0efb5mx" sourceRef="CreateAccountTransactionRecord" targetRef="RemoveCardFromAtm" />
+    <bpmn:serviceTask id="CheckAtmBalance" name="Check ATM balance" camunda:expression="${atmServiceImpl.checkAtmBalance(amount, atmId)}" camunda:resultVariable="isAtmBalanceOk">
+      <bpmn:incoming>Yes</bpmn:incoming>
+      <bpmn:outgoing>Flow_0n791up</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_047841h" sourceRef="CheckAccountBalance" targetRef="IsBalanceOnAccountOk" />
+    <bpmn:serviceTask id="BuildWithdrawalReponseMessage" name="Build withdrawal reponse message" camunda:asyncAfter="true" camunda:expression="${messageServiceImpl.buildWithdrawalResponseMessage(responseMessage)}" camunda:resultVariable="buildedResponseMessage">
+      <bpmn:extensionElements>
+        <camunda:inputOutput>
+          <camunda:outputParameter name="responseStatus">${buildedResponseMessage.status}</camunda:outputParameter>
+        </camunda:inputOutput>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0d57hoq</bpmn:incoming>
+      <bpmn:incoming>Flow_1matuge</bpmn:incoming>
+      <bpmn:incoming>Flow_0mq3m5p</bpmn:incoming>
+      <bpmn:incoming>Flow_1am3nbg</bpmn:incoming>
+      <bpmn:outgoing>Flow_0qdtvek</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="SufficientBalance" name="Change balance on account" camunda:expression="${accountServiceImpl.changeBalanceOnAccount(accountId, token, amount)}" camunda:resultVariable="isBalanceChanged">
+      <bpmn:incoming>Flow_0owb2z0</bpmn:incoming>
+      <bpmn:outgoing>Flow_13jom7r</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0n791up" sourceRef="CheckAtmBalance" targetRef="Gateway_04zvab8" />
+    <bpmn:sequenceFlow id="Flow_13jom7r" sourceRef="SufficientBalance" targetRef="Gateway_1361msh" />
+    <bpmn:serviceTask id="RemoveCardFromAtm" name="Remove card from ATM" camunda:expression="${accountServiceImpl.removeTokenFromAccount(accountId)}">
+      <bpmn:incoming>Flow_0efb5mx</bpmn:incoming>
+      <bpmn:outgoing>Flow_1twxzqg</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1twxzqg" sourceRef="RemoveCardFromAtm" targetRef="Activity_1gqg2iw" />
+    <bpmn:serviceTask id="Activity_1gqg2iw" name="Give out money, substract from the balance" camunda:expression="${atmServiceImpl.giveOutMoneyAndSubtractBalance(amount, atmId, responseStatus)}" camunda:resultVariable="withdrawalResponse">
+      <bpmn:incoming>Flow_1twxzqg</bpmn:incoming>
+      <bpmn:outgoing>Flow_0l3g749</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0l3g749" sourceRef="Activity_1gqg2iw" targetRef="end" />
+    <bpmn:exclusiveGateway id="IsBalanceOnAccountOk" name="Is balance on account Ok?" default="No">
+      <bpmn:incoming>Flow_047841h</bpmn:incoming>
+      <bpmn:outgoing>Yes</bpmn:outgoing>
+      <bpmn:outgoing>No</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Yes" name="Yes" sourceRef="IsBalanceOnAccountOk" targetRef="CheckAtmBalance">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isBalanceOk}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_0rxvo7d" name="Create reponse message for insufficient funds - account" camunda:expression="${messageServiceImpl.createMessageForInsufficientFundsAccount()}" camunda:resultVariable="responseMessage">
+      <bpmn:incoming>No</bpmn:incoming>
+      <bpmn:outgoing>Flow_0d57hoq</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="No" name="No" sourceRef="IsBalanceOnAccountOk" targetRef="Activity_0rxvo7d" />
+    <bpmn:sequenceFlow id="Flow_0d57hoq" sourceRef="Activity_0rxvo7d" targetRef="BuildWithdrawalReponseMessage" />
+    <bpmn:exclusiveGateway id="Gateway_04zvab8" name="Is balance on ATM Ok?" default="Flow_0uy7yjq">
+      <bpmn:incoming>Flow_0n791up</bpmn:incoming>
+      <bpmn:outgoing>Flow_0owb2z0</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0uy7yjq</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0owb2z0" name="Yes" sourceRef="Gateway_04zvab8" targetRef="SufficientBalance">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isAtmBalanceOk}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:serviceTask id="Activity_1sxxjc7" name="Create reponse message for insufficient funds - atm" camunda:expression="${messageServiceImpl.createMessageForInsufficientFundsAtm()}" camunda:resultVariable="responseMessage">
+      <bpmn:incoming>Flow_0uy7yjq</bpmn:incoming>
+      <bpmn:outgoing>Flow_1matuge</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0uy7yjq" name="No" sourceRef="Gateway_04zvab8" targetRef="Activity_1sxxjc7" />
+    <bpmn:sequenceFlow id="Flow_1matuge" sourceRef="Activity_1sxxjc7" targetRef="BuildWithdrawalReponseMessage" />
+    <bpmn:serviceTask id="Activity_01n4qi3" name="Create reponse message for expired token" camunda:expression="${messageServiceImpl.createMessageForExpiredToken()}" camunda:resultVariable="responseMessage">
+      <bpmn:incoming>Flow_0te38ez</bpmn:incoming>
+      <bpmn:outgoing>Flow_1am3nbg</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:exclusiveGateway id="Gateway_1361msh" name="Is balance on account changed?" default="Flow_0te38ez">
+      <bpmn:incoming>Flow_13jom7r</bpmn:incoming>
+      <bpmn:outgoing>Flow_0mq3m5p</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0te38ez</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0mq3m5p" name="Yes" sourceRef="Gateway_1361msh" targetRef="BuildWithdrawalReponseMessage">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isBalanceChanged}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0te38ez" name="No" sourceRef="Gateway_1361msh" targetRef="Activity_01n4qi3" />
+    <bpmn:sequenceFlow id="Flow_1am3nbg" sourceRef="Activity_01n4qi3" targetRef="BuildWithdrawalReponseMessage" />
+    <bpmn:sequenceFlow id="Flow_0qdtvek" sourceRef="BuildWithdrawalReponseMessage" targetRef="CreateAccountTransactionRecord" />
+  </bpmn:process>
+  <bpmn:error id="Error_05fekdh" name="ExpiredToken" errorCode="ExpiredToken" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Withdrawal">
+      <bpmndi:BPMNEdge id="Flow_0n791up_di" bpmnElement="Flow_0n791up">
+        <di:waypoint x="630" y="167" />
+        <di:waypoint x="715" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_13jom7r_di" bpmnElement="Flow_13jom7r">
+        <di:waypoint x="950" y="167" />
+        <di:waypoint x="1045" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0d57hoq_di" bpmnElement="Flow_0d57hoq">
+        <di:waypoint x="480" y="540" />
+        <di:waypoint x="1280" y="540" />
+        <di:waypoint x="1280" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1fp17al_di" bpmnElement="SequenceFlow_1fp17al">
+        <di:waypoint x="192" y="167" />
+        <di:waypoint x="247" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_047841h_di" bpmnElement="Flow_047841h">
+        <di:waypoint x="347" y="167" />
+        <di:waypoint x="405" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0p3qtdu_di" bpmnElement="Yes">
+        <di:waypoint x="455" y="167" />
+        <di:waypoint x="530" y="167" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="484" y="149" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1lxzthh_di" bpmnElement="No">
+        <di:waypoint x="430" y="192" />
+        <di:waypoint x="430" y="500" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="438" y="252.99999999999977" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0owb2z0_di" bpmnElement="Flow_0owb2z0">
+        <di:waypoint x="765" y="167" />
+        <di:waypoint x="850" y="167" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="799" y="149" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0uy7yjq_di" bpmnElement="Flow_0uy7yjq">
+        <di:waypoint x="740" y="192" />
+        <di:waypoint x="740" y="390" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="748" y="253" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1matuge_di" bpmnElement="Flow_1matuge">
+        <di:waypoint x="790" y="430" />
+        <di:waypoint x="1250" y="430" />
+        <di:waypoint x="1250" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0l3g749_di" bpmnElement="Flow_0l3g749">
+        <di:waypoint x="1820" y="167" />
+        <di:waypoint x="1882" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0efb5mx_di" bpmnElement="Flow_0efb5mx">
+        <di:waypoint x="1480" y="167" />
+        <di:waypoint x="1550" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0qdtvek_di" bpmnElement="Flow_0qdtvek">
+        <di:waypoint x="1300" y="167" />
+        <di:waypoint x="1380" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1twxzqg_di" bpmnElement="Flow_1twxzqg">
+        <di:waypoint x="1650" y="167" />
+        <di:waypoint x="1720" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mq3m5p_di" bpmnElement="Flow_0mq3m5p">
+        <di:waypoint x="1095" y="167" />
+        <di:waypoint x="1200" y="167" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1139" y="149" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0te38ez_di" bpmnElement="Flow_0te38ez">
+        <di:waypoint x="1070" y="192" />
+        <di:waypoint x="1070" y="270" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1078" y="228" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1am3nbg_di" bpmnElement="Flow_1am3nbg">
+        <di:waypoint x="1120" y="310" />
+        <di:waypoint x="1220" y="310" />
+        <di:waypoint x="1220" y="210" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_0vp9grg_di" bpmnElement="SufficientBalance">
+        <dc:Bounds x="850" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="start">
+        <dc:Bounds x="156" y="149" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="163" y="192" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_11gtt15_di" bpmnElement="CheckAccountBalance">
+        <dc:Bounds x="247" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1jggum2_di" bpmnElement="CheckAtmBalance">
+        <dc:Bounds x="530" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_060vamb_di" bpmnElement="IsBalanceOnAccountOk" isMarkerVisible="true">
+        <dc:Bounds x="405" y="142" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="397" y="86" width="66" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_04zvab8_di" bpmnElement="Gateway_04zvab8" isMarkerVisible="true">
+        <dc:Bounds x="715" y="142" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="707" y="86" width="66" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_0x6ir2l_di" bpmnElement="end">
+        <dc:Bounds x="1882" y="149" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1890" y="125" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_089vpt6_di" bpmnElement="CreateAccountTransactionRecord">
+        <dc:Bounds x="1380" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1gqg2iw_di" bpmnElement="Activity_1gqg2iw">
+        <dc:Bounds x="1720" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1mk3c2t_di" bpmnElement="BuildWithdrawalReponseMessage">
+        <dc:Bounds x="1200" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0wfm3sl_di" bpmnElement="RemoveCardFromAtm">
+        <dc:Bounds x="1550" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0rxvo7d_di" bpmnElement="Activity_0rxvo7d">
+        <dc:Bounds x="380" y="500" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1sxxjc7_di" bpmnElement="Activity_1sxxjc7">
+        <dc:Bounds x="690" y="390" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1361msh_di" bpmnElement="Gateway_1361msh" isMarkerVisible="true">
+        <dc:Bounds x="1045" y="142" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1026" y="112" width="90" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_01n4qi3_di" bpmnElement="Activity_01n4qi3">
+        <dc:Bounds x="1020" y="270" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

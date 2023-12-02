@@ -1,0 +1,414 @@
+openapi: 3.0.3
+
+info:
+  title: Bankomat Backeng For Frontend Service
+  description: Bankomat Backeng For Frontend Service
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080/
+
+tags:
+  - name: public
+  - name: private
+paths:
+  /bankomat-bff/v1/bff-api/card-verification/:
+    post:
+      tags:
+        - public
+      summary: Check match between card and PIN code
+      operationId: cardVerification
+      parameters: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardVerificationRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardVerificationResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /bankomat-bff/v1/bff-api/withdrawal/:
+    post:
+      tags:
+        - public
+      summary: Withdrawal found from account
+      operationId: withdrawal
+      parameters: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawalRequest'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WithdrawalResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /bankomat-bff/v1/bff-api/atm/get-all:
+    get:
+      tags:
+        - private
+      summary: Get all atms
+      description: Get all atms
+      operationId: getAllAtms
+      parameters: [ ]
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AtmResponseList'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /bankomat-bff/v1/bff-api/account/get-all:
+    get:
+      tags:
+        - private
+      summary: Get all accounts
+      description: Get all accounts
+      operationId: getAllAccounts
+      parameters: [ ]
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountResponseList'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+components:
+  schemas:
+    CardVerificationRequest:
+      type: object
+      properties:
+        cardNumber:
+          type: string
+          example: "1234567890123456"
+        expirationDate:
+          type: string
+          example: "12/25"
+        cvv:
+          type: string
+          example: "123"
+        pin:
+          type: string
+          example: "9876"
+        transactionId:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        atmId:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        requestTime:
+          type: string
+          format: date-time
+          example: 2023-11-30 15:25:53.423
+    CardVerificationResponse:
+      type: object
+      properties:
+        accountId:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        token:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        status:
+          type: string
+          enum:
+            - "success"
+            - "pending"
+            - "cancelled"
+            - "insufficientFunds"
+            - "invalidCard"
+            - "timeout"
+            - "networkError"
+        message:
+          type: string
+          example: "Card Expiration date is different"
+    WithdrawalRequest:
+      type: object
+      properties:
+        accountId:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        atmId:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        token:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        amount:
+          type: number
+          format: float
+          example: 100.0
+        currency:
+          type: string
+          example: "CZK"
+        transactionId:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        requestTime:
+          type: string
+          format: date-time
+          example: 2023-11-30 15:25:53.423
+    WithdrawalResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        status:
+          type: string
+          enum:
+            - "success"
+            - "pending"
+            - "cancelled"
+            - "insufficientFunds"
+            - "invalidCard"
+            - "timeout"
+            - "networkError"
+        message:
+          type: string
+          example: "Transaction completed successfully"
+    AccountResponseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/AccountResponse'
+    AccountResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        balance:
+          type: number
+          format: float
+          example: "1000.10"
+        token:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        createdAt:
+          type: string
+          format: date-time
+          example: 2023-11-30 15:25:53.423
+        status:
+          type: string
+          enum:
+            - "activated"
+            - "deactivated"
+            - "cancelled"
+        lockedAt:
+          type: string
+          format: date-time
+          example: 2023-11-30 15:25:53.423
+        AccountTransactionResponseList:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountTransactionResponse'
+        CardResponseList:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardResponse'
+    CardResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        cardNumber:
+          type: string
+          example: "1234567890123456"
+        expirationDate:
+          type: string
+          example: "12/25"
+        cvv:
+          type: string
+          example: "123"
+        pin:
+          type: string
+          example: "9876"
+        createdAt:
+          type: string
+          format: date-time
+          example: 2023-11-30 15:25:53.423
+        expiredAt:
+          type: string
+          format: date-time
+          example: 2023-11-30 15:25:53.423
+        CardTransactionResponseList:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardTransactionResponse'
+    AtmResponseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/AtmResponse'
+    AtmResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "1"
+        balance:
+          type: number
+          format: float
+          example: "1000.10"
+        AccountTransactionResponseList:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccountTransactionResponse'
+        CardTransactionResponseList:
+          type: array
+          items:
+            $ref: '#/components/schemas/CardTransactionResponse'
+    AccountTransactionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        amount:
+          type: number
+          format: float
+          example: "1000.10"
+        balanceBefore:
+          type: number
+          format: float
+          example: "1000.10"
+        balanceAfter:
+          type: number
+          format: float
+          example: "1000.10"
+        status:
+          type: string
+          enum:
+            - "success"
+            - "pending"
+            - "cancelled"
+            - "insufficientFunds"
+            - "invalidCard"
+            - "timeout"
+            - "networkError"
+        createdAt:
+          type: string
+          format: date-time
+          example: 2023-11-30 15:25:53.423
+    CardTransactionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        status:
+          type: string
+          enum:
+            - "success"
+            - "pending"
+            - "cancelled"
+            - "insufficientFunds"
+            - "invalidCard"
+            - "timeout"
+            - "networkError"
+        createdAt:
+          type: string
+          format: date-time
+          example: 2023-11-30 15:25:53.423
+    ProblemDetails:
+      type: object
+      description: Error response for codes 4xx and 5xx
+      required:
+        - title
+        - type
+      properties:
+        type:
+          type: string
+          description: "type"
+        title:
+          type: string
+          description: "title"
+        status:
+          type: integer
+          format: int32
+          description: "status"
+        detail:
+          type: string
+          description: "detail"
+        instance:
+          type: string
+          description: "instance"
+        embeded:
+          $ref: '#/components/schemas/AppSpecificProblemDetails'
+    AppSpecificProblemDetails:
+      type: object
+      description: "Specific problem details"
+      required:
+        - code
+        - reason
+      properties:
+        code:
+          type: string
+          description: "code"
+        reason:
+          type: string
+          description: "reason"
+        message:
+          type: string
+          description: "message"
+        status:
+          type: integer
+          format: int32
+          description: "status"
