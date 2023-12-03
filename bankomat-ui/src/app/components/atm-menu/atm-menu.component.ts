@@ -1,11 +1,10 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { Atm } from 'src/app/models/atm';
-import { CardVerificationResponse } from 'src/app/models/card-verification-response';
+import { Component } from '@angular/core';
 import { trigger, style, animate, transition } from '@angular/animations';
+import { WithdrawalResponse } from 'src/app/models/withdrawal-response';
 
 @Component({
-  selector: 'app-account-verification',
-  templateUrl: './account-verification.component.html',
+  selector: 'app-atm-menu',
+  templateUrl: './atm-menu.component.html',
   animations: [
     trigger('incomingAnimation', [
       transition(':enter', [
@@ -31,17 +30,18 @@ import { trigger, style, animate, transition } from '@angular/animations';
     ]),
   ],
 })
-export class AccountVerificationComponent implements OnInit {
-  @Input() cardVerification: CardVerificationResponse =
-    new CardVerificationResponse();
-
-  placeholder: boolean = true;
+export class AtmMenuComponent {
+  showWithdrawal: boolean = false;
+  showCardEjection: boolean = false;
+  withdrawalObject: WithdrawalResponse = new WithdrawalResponse();
 
   constructor() {}
 
-  ngOnInit() {
-    setTimeout(() => {
-      this.placeholder = false;
-    }, 2000);
+  startWithdrawal() {
+    this.showWithdrawal = true;
+  }
+
+  startEjection() {
+    this.showCardEjection = true;
   }
 }

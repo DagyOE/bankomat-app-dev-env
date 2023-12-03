@@ -6,40 +6,45 @@ import { AtmComponent } from './pages/atm/atm.component';
 import { CashWithdrawalComponent } from './components/cash-withdrawal/cash-withdrawal.component';
 import { CardVerificationComponent } from './components/card-verification/card-verification.component';
 import { CardEjectionComponent } from './components/card-ejection/card-ejection.component';
+import { AtmMenuComponent } from './components/atm-menu/atm-menu.component';
 
 const routes: Routes = [
-  { 
-    path: '', 
-    component: CardEntryComponent, 
+  {
+    path: '',
+    component: CardEntryComponent,
     children: [
       {
         path: '',
-        component: CardVerificationComponent
+        component: CardVerificationComponent,
       },
-      { 
-        path: 'account-verification', 
-        component: AccountVerificationComponent 
-      }
-    ] 
+      {
+        path: 'account-verification',
+        component: AccountVerificationComponent,
+      },
+    ],
   },
-  { 
-    path: 'atm', 
-    component: AtmComponent, 
+  {
+    path: 'atm',
+    component: AtmComponent,
     children: [
-      { 
-        path: '', 
-        component: CashWithdrawalComponent 
+      {
+        path: '',
+        component: AtmMenuComponent,
+      },
+      {
+        path: 'withdrawal',
+        component: CashWithdrawalComponent,
       },
       {
         path: 'card-ejection',
-        component: CardEjectionComponent
-      }
-    ] 
-  }
+        component: CardEjectionComponent,
+      },
+    ],
+  },
 ];
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class AppRoutingModule { }
+export class AppRoutingModule {}

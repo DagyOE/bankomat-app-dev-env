@@ -1,1 +1,12 @@
-<p>account-verification works!</p>
+<div class="row" [@incomingAnimation]>
+  <h1>Status</h1>
+  <p *ngIf="placeholder; else responseStatus" class="animated-background"></p>
+  <ng-template #responseStatus>
+    <p>{{ cardVerification.status }}</p>
+  </ng-template>
+  <h1>Message</h1>
+  <p *ngIf="placeholder; else responseMessage" class="animated-background"></p>
+  <ng-template #responseMessage>
+    <p>{{ cardVerification.message }}</p>
+  </ng-template>
+</div>
