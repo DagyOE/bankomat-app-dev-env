@@ -41,4 +41,13 @@ services:
     container_name: bankomat-ui
     image: bankomat-ui
     ports:
-      - "4200:4200"
+      - "4200:80"
+
+  nginx:
+    image: nginx:1.21.3-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./dist/bankomat-ui:/usr/share/nginx/html
+    depends_on:
+      - bankomat-ui
