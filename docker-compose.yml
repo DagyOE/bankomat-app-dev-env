@@ -36,3 +36,9 @@ services:
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
+
+  bankomat-ui:
+    container_name: bankomat-ui
+    image: bankomat-ui
+    ports:
+      - "4200:4200"
