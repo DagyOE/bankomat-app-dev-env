@@ -1,9 +1,4 @@
-
 # Bankomat App
-
-
-
-
 
 ## Deployment
 
@@ -12,7 +7,10 @@ To deploy this project run
 ```bash
   cd bankomat-bff
   mvn clean install
-  docker build -t bankomat-app:0.1 . 
+  docker build -t bankomat-app:0.1 .
+  cd ..
+  cd bankomat-ui
+  docker build -t bankomat-ui .
   cd ..
   docker compose up
 ```
@@ -23,7 +21,7 @@ Other commands
 Getting api`s for development:
 
   http://localhost:8080/bankomat-bff/v1/bff-api/atm/get-all
-  http://localhost:8080/bankomat-bff/v1/bff-api/account/get-all  
+  http://localhost:8080/bankomat-bff/v1/bff-api/account/get-all
 
 PgAdmin:
 
@@ -33,9 +31,9 @@ PgAdmin:
   password: admin
 
 Database:
-  
+
   docker ps
-  docker inspect <CONTAINER ID> | grep IPAddress 
+  docker inspect <CONTAINER ID> | grep IPAddress
   - container with name: database-postgresql
   - copy IPAddress
 
@@ -45,4 +43,3 @@ Database:
   database: bankomat-app
 
 ```
-
