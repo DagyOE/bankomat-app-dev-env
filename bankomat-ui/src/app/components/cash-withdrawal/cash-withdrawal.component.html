@@ -4,8 +4,7 @@
   [@incomingAnimation]
 >
   <h1>Withdrawal money</h1>
-  <h2>Insert how many</h2>
-  <form (submit)="withdrawalMoney()">
+  <form (submit)="withdrawalMoney()" class="card-form">
     <label> Amount </label>
     <input
       [(ngModel)]="withdrawalRequest.amount"

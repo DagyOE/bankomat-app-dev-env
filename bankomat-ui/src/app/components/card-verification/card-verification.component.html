@@ -3,38 +3,40 @@
   class="row"
   [@incomingAnimation]
 >
-  Insert Card
-  <form (submit)="verificateCard()">
-    <label> Card number </label>
-    <input
-      [(ngModel)]="cardVerification.cardNumber"
-      type="text"
-      placeholder="1234567890123465"
-      name="cardNumber"
-    />
-    <label> Expiration date </label>
-    <input
-      [(ngModel)]="cardVerification.expirationDate"
-      type="text"
-      placeholder="12/25"
-      name="expirationDate"
-    />
-    <label> CVV </label>
-    <input
-      [(ngModel)]="cardVerification.cvv"
-      type="text"
-      placeholder="123"
-      name="cvv"
-    />
-    <label> PIN </label>
-    <input
-      [(ngModel)]="cardVerification.pin"
-      type="text"
-      placeholder="9876"
-      name="pin"
-    />
-    <button type="submit">Insert card</button>
-  </form>
+  <div class="container">
+    <h1>Insert Card</h1>
+    <form (submit)="verificateCard()" class="card-form">
+      <label> Card number </label>
+      <input
+        [(ngModel)]="cardVerification.cardNumber"
+        type="text"
+        placeholder="1234567890123465"
+        name="cardNumber"
+      />
+      <label> Expiration date </label>
+      <input
+        [(ngModel)]="cardVerification.expirationDate"
+        type="text"
+        placeholder="12/25"
+        name="expirationDate"
+      />
+      <label> CVV </label>
+      <input
+        [(ngModel)]="cardVerification.cvv"
+        type="text"
+        placeholder="123"
+        name="cvv"
+      />
+      <label> PIN </label>
+      <input
+        [(ngModel)]="cardVerification.pin"
+        type="text"
+        placeholder="9876"
+        name="pin"
+      />
+      <button type="submit">Insert card</button>
+    </form>
+  </div>
 </div>
 <ng-template #accountVerificationComponent>
   <app-account-verification
