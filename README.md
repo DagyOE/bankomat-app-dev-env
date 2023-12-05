@@ -1,3 +1,5 @@
+# It is my guilty pleasure repair it. It is my playground for repair gaps, result of test is in "main" repository
+
 # Bankomat App
 
 ## Deployment
