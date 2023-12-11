@@ -4,6 +4,9 @@ logging:
     file: '{"timestamp":"%clr(%d{dd-MM-yyyy HH:mm:ss.SSS})", "level":"%clr(%p)", "message":"%clr(%m)", "source":"%clr(%logger{0})", "thread":"%clr([%t])"}%n'
   level:
     liquibase: INFO
+    org:
+      springframework:
+        web.socket: DEBUG
 
 camunda.bpm.admin-user:
   id: admin

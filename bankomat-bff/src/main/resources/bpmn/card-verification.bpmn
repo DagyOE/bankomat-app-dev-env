@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0fr9mxs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0fr9mxs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.17.0">
   <bpmn:process id="CardVerification" name="Card Verification Process" isExecutable="true" camunda:versionTag="1.0.0" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="StartCardVerification" name="Start">
       <bpmn:outgoing>SequenceFlow_1fp17al</bpmn:outgoing>
@@ -27,7 +27,7 @@
       <bpmn:outgoing>Flow_1fptqi3</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:endEvent id="Event_1kpeyul" name="End">
-      <bpmn:incoming>Flow_02fr12h</bpmn:incoming>
+      <bpmn:incoming>Flow_0jizlmd</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:exclusiveGateway id="Gateway_0dqkkcm" name="Is Card Expired?" default="Flow_1okuxre">
       <bpmn:incoming>Flow_1t1ftqs</bpmn:incoming>
@@ -68,7 +68,12 @@
       <bpmn:incoming>Flow_0tvwdze</bpmn:incoming>
       <bpmn:outgoing>Flow_02fr12h</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_02fr12h" sourceRef="CreateCardTransactionRecord" targetRef="Event_1kpeyul" />
+    <bpmn:sequenceFlow id="Flow_02fr12h" sourceRef="CreateCardTransactionRecord" targetRef="SendSignalToFe" />
+    <bpmn:serviceTask id="SendSignalToFe" name="Send Signal To FE" camunda:expression="${messageService.notifyAfterEndFlow(execution)}">
+      <bpmn:incoming>Flow_02fr12h</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jizlmd</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_0jizlmd" sourceRef="SendSignalToFe" targetRef="Event_1kpeyul" />
     <bpmn:textAnnotation id="TextAnnotation_0hig0sc">
       <bpmn:text>if the card is expired returns isCardExpired-true if it is valid isCardExpired-false</bpmn:text>
     </bpmn:textAnnotation>
@@ -81,19 +86,65 @@
   <bpmn:error id="Error_00h6f4i" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="CardVerification">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartCardVerification">
+        <dc:Bounds x="179" y="219" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="186" y="262" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1i5zx4p_di" bpmnElement="CheckCardExpiration">
+        <dc:Bounds x="270" y="197" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_106986u_di" bpmnElement="PinCheck">
+        <dc:Bounds x="560" y="197" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0scnglk_di" bpmnElement="IsAccountIdEmpty" isMarkerVisible="true">
+        <dc:Bounds x="725" y="212" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="758" y="175" width="64" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0dqkkcm_di" bpmnElement="Gateway_0dqkkcm" isMarkerVisible="true">
+        <dc:Bounds x="435" y="212" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="459" y="182" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_13rmdez_di" bpmnElement="BuildReponseMessage">
+        <dc:Bounds x="970" y="197" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1xxhzso_di" bpmnElement="CreateReponseMessageForExpiredCard">
+        <dc:Bounds x="410" y="320" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0d8va17_di" bpmnElement="CreateEeponseMessageForBadPINCode">
+        <dc:Bounds x="700" y="320" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1fsumbd_di" bpmnElement="CreateCardTransactionRecord">
+        <dc:Bounds x="1150" y="197" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0hig0sc_di" bpmnElement="TextAnnotation_0hig0sc">
         <dc:Bounds x="330" y="80" width="170" height="53" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="TextAnnotation_0rhbkb1_di" bpmnElement="TextAnnotation_0rhbkb1">
         <dc:Bounds x="680" y="73" width="200" height="68" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1t1ftqs_di" bpmnElement="Flow_1t1ftqs">
-        <di:waypoint x="370" y="237" />
-        <di:waypoint x="435" y="237" />
-      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BPMNShape_0zwh5oi" bpmnElement="SendSignalToFe">
+        <dc:Bounds x="1320" y="197" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1kpeyul_di" bpmnElement="Event_1kpeyul">
+        <dc:Bounds x="1482" y="219" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1490" y="265" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="SequenceFlow_1fp17al_di" bpmnElement="SequenceFlow_1fp17al">
         <di:waypoint x="215" y="237" />
         <di:waypoint x="270" y="237" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1t1ftqs_di" bpmnElement="Flow_1t1ftqs">
+        <di:waypoint x="370" y="237" />
+        <di:waypoint x="435" y="237" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0i5k8d6_di" bpmnElement="Flow_0i5k8d6">
         <di:waypoint x="660" y="237" />
@@ -112,6 +163,10 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="818.0000000000002" y="219" width="15" height="14" />
         </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0tvwdze_di" bpmnElement="Flow_0tvwdze">
+        <di:waypoint x="1070" y="237" />
+        <di:waypoint x="1150" y="237" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1okuxre_di" bpmnElement="Flow_1okuxre">
         <di:waypoint x="460" y="262" />
@@ -138,56 +193,10 @@
         <di:waypoint x="1020" y="470" />
         <di:waypoint x="1020" y="277" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0tvwdze_di" bpmnElement="Flow_0tvwdze">
-        <di:waypoint x="1070" y="237" />
-        <di:waypoint x="1150" y="237" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_02fr12h_di" bpmnElement="Flow_02fr12h">
         <di:waypoint x="1250" y="237" />
-        <di:waypoint x="1312" y="237" />
+        <di:waypoint x="1320" y="237" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartCardVerification">
-        <dc:Bounds x="179" y="219" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="186" y="262" width="24" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1i5zx4p_di" bpmnElement="CheckCardExpiration">
-        <dc:Bounds x="270" y="197" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_106986u_di" bpmnElement="PinCheck">
-        <dc:Bounds x="560" y="197" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0scnglk_di" bpmnElement="IsAccountIdEmpty" isMarkerVisible="true">
-        <dc:Bounds x="725" y="212" width="50" height="50" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="758" y="175" width="64" height="27" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_0dqkkcm_di" bpmnElement="Gateway_0dqkkcm" isMarkerVisible="true">
-        <dc:Bounds x="435" y="212" width="50" height="50" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="459" y="182" width="82" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1xxhzso_di" bpmnElement="CreateReponseMessageForExpiredCard">
-        <dc:Bounds x="410" y="320" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0d8va17_di" bpmnElement="CreateEeponseMessageForBadPINCode">
-        <dc:Bounds x="700" y="320" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_13rmdez_di" bpmnElement="BuildReponseMessage">
-        <dc:Bounds x="970" y="197" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1kpeyul_di" bpmnElement="Event_1kpeyul">
-        <dc:Bounds x="1312" y="219" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1320" y="265" width="20" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1fsumbd_di" bpmnElement="CreateCardTransactionRecord">
-        <dc:Bounds x="1150" y="197" width="100" height="80" />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Association_1ufrglv_di" bpmnElement="Association_1ufrglv">
         <di:waypoint x="453" y="219" />
         <di:waypoint x="423" y="133" />
@@ -195,6 +204,10 @@
       <bpmndi:BPMNEdge id="Association_1vneqnl_di" bpmnElement="Association_1vneqnl">
         <di:waypoint x="747" y="215" />
         <di:waypoint x="738" y="141" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jizlmd_di" bpmnElement="Flow_0jizlmd">
+        <di:waypoint x="1420" y="237" />
+        <di:waypoint x="1482" y="237" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

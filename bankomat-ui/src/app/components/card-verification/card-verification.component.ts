@@ -7,6 +7,7 @@ import { CardVerificationResponse } from 'src/app/models/card-verification-respo
 import { ProcessesService } from 'src/app/services/processes.service';
 import { v4 as uuid } from 'uuid';
 import { trigger, style, animate, transition } from '@angular/animations';
+import {WebSocketService} from "../../services/web-socket.service";
 
 @Component({
   selector: 'app-card-verification',
@@ -45,7 +46,8 @@ export class CardVerificationComponent implements OnInit {
 
   constructor(
     private processesService: ProcessesService,
-    private router: Router
+    private router: Router,
+    private webSocket: WebSocketService
   ) {}
 
   ngOnInit(): void {
@@ -54,6 +56,7 @@ export class CardVerificationComponent implements OnInit {
       this.atm.atmId = data[0].id;
       localStorage.setItem('atmId', this.atm.atmId!);
     });
+    this.webSocket.initializeWebSocketConnection();
   }
 
   verificateCard() {
