@@ -1,5 +1,6 @@
 package com.sanchez.service;
 
+import com.sanchez.enumerate.Variable;
 import com.sanchez.mapper.Mapper;
 import com.sanchez.model.Account;
 import com.sanchez.model.AccountTransaction;
@@ -12,7 +13,10 @@ import com.sanchez.repository.AccountTransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.camunda.bpm.engine.delegate.BpmnError;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -28,39 +32,54 @@ public class AccountServiceImpl {
     private final CardServiceImpl cardService;
     private final AtmServiceImpl atmService;
 
-    public boolean checkAccountBalance(String accountId, Float amount) {
+    public void checkAccountBalance(DelegateExecution execution) {
+
+        String accountId = (String) execution.getVariable(Variable.ACCOUNT_ID.getKey());
+        Float amount = (Float) execution.getVariable(Variable.AMOUNT.getKey());
+
         log.info("Start checking account balance before withdrawal, accountId: {}", accountId);
 
         Account account = getAccountByAccountId(accountId);
 
-        if ((account.getBalance()-amount) < 0) {
+        if ((account.getBalance()-amount) < 0F) {
             log.info("Throwing error \"Insufficient funds on your account\"");
-            return false;
+            execution.setVariable(Variable.ERROR_MESSAGE.getKey(), "Insufficient funds on your account");
+            throw new BpmnError("LowAccountBalance");
         }
 
         log.info("Checking account balance before withdrawal, accountId: {}, has been completed", accountId);
-        return true;
     }
 
     @Transactional
-    public boolean changeBalanceOnAccount(String accountId, String token, Float amount) {
+    public void changeBalanceOnAccount(DelegateExecution execution) {
+
+        String accountId = (String) execution.getVariable(Variable.ACCOUNT_ID.getKey());
+        String token = (String) execution.getVariable(Variable.TOKEN.getKey());
+        Float amount = (Float) execution.getVariable(Variable.AMOUNT.getKey());
+
         log.info("Start changing balance on account with id: {}", accountId);
 
         Account account = getAccountByAccountId(accountId);
 
         if (Objects.isNull(account.getToken()) || !account.getToken().equals(token)) {
             log.info("Throwing error \"Token has expired\"");
-            return false;
+            execution.setVariable(Variable.ERROR_MESSAGE.getKey(), "Token has expired");
+            throw new BpmnError("ExpiredToken");
         }
 
         account.setBalance((account.getBalance() - amount));
 
         log.info("Changing balance on account with id: {}, has been completed", accountId);
-        return true;
     }
 
-    public void createAccountTransaction(String transactionId, String accountId, String atmId,
-                                         Float amount, WithdrawalResponse.StatusEnum responseStatus) {
+    public void createAccountTransaction(DelegateExecution execution) {
+
+        String accountId = (String) execution.getVariable(Variable.ACCOUNT_ID.getKey());
+        String transactionId = (String) execution.getVariable(Variable.TRANSACTION_ID.getKey());
+        String atmId = (String) execution.getVariable(Variable.ATM_ID.getKey());
+        String errorMessage = (String) execution.getVariable(Variable.ERROR_MESSAGE.getKey());
+        Float amount = (Float) execution.getVariable(Variable.AMOUNT.getKey());
+
         log.info("Start creating account transaction after withdrawal, accountId: {}", accountId);
 
         AccountTransaction accountTransaction = new AccountTransaction();
@@ -69,19 +88,33 @@ public class AccountServiceImpl {
         accountTransaction.setId(transactionId);
         accountTransaction.setAccount(account);
         accountTransaction.setAtm(atmService.getAtmById(atmId));
-        accountTransaction.setAmount(responseStatus == WithdrawalResponse.StatusEnum.SUCCESS ? amount : 0L);
-        accountTransaction.setBalanceBefore(responseStatus == WithdrawalResponse.StatusEnum.SUCCESS ?
-                (account.getBalance() + amount) : account.getBalance());
+        accountTransaction.setAmount(amount);
         accountTransaction.setBalanceAfter(account.getBalance());
-        accountTransaction.setStatus(responseStatus == WithdrawalResponse.StatusEnum.SUCCESS  ?
-                AccountTransactionResponse.StatusEnum.SUCCESS :
-                AccountTransactionResponse.StatusEnum.fromValue(responseStatus.getValue()
-        ));
+        if (StringUtils.hasLength(errorMessage)) {
+            accountTransaction.setBalanceBefore(account.getBalance());
+            accountTransaction.setStatus(AccountTransactionResponse.StatusEnum.CANCELLED);
+        } else {
+            accountTransaction.setBalanceBefore(account.getBalance() + amount);
+            accountTransaction.setStatus(AccountTransactionResponse.StatusEnum.SUCCESS);
+        }
         accountTransaction.setCreatedAt(OffsetDateTime.now());
 
         accountTransactionRepository.save(accountTransaction);
 
         log.info("Creating account transaction after withdrawal, accountId: {}, has been completed", accountId);
+    }
+
+    @Transactional
+    public void removeTokenFromAccount(DelegateExecution execution) {
+
+        String accountId = (String) execution.getVariable(Variable.ACCOUNT_ID.getKey());
+
+        log.info("Start removing token from account with id: {}", accountId);
+
+        Account account = getAccountByAccountId(accountId);
+        account.setToken(null);
+
+        log.info("Start removing token from account with id: {}", accountId);
     }
 
     public Account getAccountByCardInformation(String cardNumber) {
@@ -112,15 +145,5 @@ public class AccountServiceImpl {
 
         log.info("Getting all accounts, has been completed");
         return Mapper.accountListToAccountResponseList(accounts);
-    }
-
-    @Transactional
-    public void removeTokenFromAccount(String accountId) {
-        log.info("Start removing token from account with id: {}", accountId);
-
-        Account account = getAccountByAccountId(accountId);
-        account.setToken(null);
-
-        log.info("Start removing token from account with id: {}", accountId);
     }
 }

@@ -12,7 +12,8 @@ public enum Variable {
     ACCOUNT_RESPONSE("accountResponse"),
     AMOUNT("amount"),
     CURRENCY("currency"),
-    ATM_ID("atmId");
+    ATM_ID("atmId"),
+    ERROR_MESSAGE("errorMessage");
 
     private String key;
 

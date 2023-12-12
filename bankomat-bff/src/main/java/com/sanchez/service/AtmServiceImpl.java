@@ -1,14 +1,19 @@
 package com.sanchez.service;
 
+import com.sanchez.enumerate.Variable;
 import com.sanchez.mapper.Mapper;
 import com.sanchez.model.Atm;
 import com.sanchez.openapi.model.AtmResponse;
+import com.sanchez.openapi.model.CardTransactionResponse;
 import com.sanchez.openapi.model.WithdrawalResponse;
 import com.sanchez.repository.AtmRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.camunda.bpm.engine.delegate.BpmnError;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -20,32 +25,41 @@ public class AtmServiceImpl {
 
     private final AtmRepository atmRepository;
 
-    public boolean checkAtmBalance(Float amount, String atmId) {
+    public void checkAtmBalance(DelegateExecution execution) {
+
+        String atmId = (String) execution.getVariable(Variable.ATM_ID.getKey());
+        Float amount = (Float) execution.getVariable(Variable.AMOUNT.getKey());
+
         log.info("Start checking atm balance");
 
         Atm atm = getAtmById(atmId);
 
         if (amount > atm.getBalance()) {
             log.info("Throwing error \"Insufficient funds in atm\"");
-            return false;
+            execution.setVariable(Variable.ERROR_MESSAGE.getKey(), "Token has expired");
+            throw new BpmnError("LowAtmBalance");
         }
 
         log.info("Checking atm balance, has been completed");
-        return true;
     }
 
     @Transactional
-    public void giveOutMoneyAndSubtractBalance(Float amount, String atmId,
-                                               WithdrawalResponse.StatusEnum responseStatus) {
+    public void giveOutMoneyAndSubtractBalance(DelegateExecution execution) {
+
+        String atmId = (String) execution.getVariable(Variable.ATM_ID.getKey());
+        String errorMessage = (String) execution.getVariable(Variable.ERROR_MESSAGE.getKey());
+        Float amount = (Float) execution.getVariable(Variable.AMOUNT.getKey());
+
         log.info("Start giving out money and subtract balance with amount: {}", amount);
 
         Atm atm = getAtmById(atmId);
 
-        if (responseStatus.equals(WithdrawalResponse.StatusEnum.SUCCESS)) {
+        if (!StringUtils.hasLength(errorMessage)) {
+            log.info("Giving out money and subtract balance with amount: {}, has been completed", amount);
             atm.setBalance((atm.getBalance() - amount));
+        } else {
+            log.info("Giving out money and subtract balance with amount: {}, has been failed", amount);
         }
-
-        log.info("Giving out money and subtract balance with amount: {}, has been completed", amount);
     }
 
     public Atm getAtmById(String atmId) {

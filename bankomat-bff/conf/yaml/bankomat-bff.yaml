@@ -10,6 +10,7 @@ servers:
 
 tags:
   - name: public
+  - name: callbacks
   - name: private
 paths:
   /bankomat-bff/v1/bff-api/card-verification/:
@@ -28,10 +29,6 @@ paths:
       responses:
         '200':
           description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/CardVerificationResponse'
         '400':
           description: Bad Request
           content:
@@ -57,6 +54,68 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/WithdrawalRequest'
+      responses:
+        '202':
+          description: Successful operation
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /bankomat-bff/v1/bff-api/callback/card-verification/{transactionId}:
+    get:
+      tags:
+        - callbacks
+      summary: Callback after card verification process
+      operationId: cardVerificationCallback
+      parameters:
+        - name: transactionId
+          in: path
+          description: ID of transaction
+          required: true
+          schema:
+            type: string
+            example: 3cca68c6-b44f-40ea-9a11-973291ee4b26
+      responses:
+        '202':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CardVerificationResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /bankomat-bff/v1/bff-api/callback/withdrawal/{transactionId}:
+    get:
+      tags:
+        - callbacks
+      summary: Callback after card withdrawal process
+      operationId: withdrawalCallback
+      parameters:
+        - name: transactionId
+          in: path
+          description: ID of transaction
+          required: true
+          schema:
+            type: string
+            example: 3cca68c6-b44f-40ea-9a11-973291ee4b26
       responses:
         '200':
           description: Successful operation
@@ -208,9 +267,6 @@ components:
     WithdrawalResponse:
       type: object
       properties:
-        transactionId:
-          type: string
-          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
         status:
           type: string
           enum:

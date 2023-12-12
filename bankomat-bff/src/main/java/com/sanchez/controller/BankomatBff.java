@@ -4,6 +4,7 @@ import com.sanchez.openapi.api.BankomatBffApiDelegate;
 import com.sanchez.openapi.model.*;
 import com.sanchez.service.AccountServiceImpl;
 import com.sanchez.service.AtmServiceImpl;
+import com.sanchez.service.CallbackService;
 import com.sanchez.service.CamundaProcessService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,21 +18,20 @@ import java.util.List;
 public class BankomatBff implements BankomatBffApiDelegate {
 
     private final CamundaProcessService bankomatCamundaProcessService;
+    private final CallbackService callbackService;
     private final AccountServiceImpl accountService;
     private final AtmServiceImpl atmService;
 
     @Override
-    public ResponseEntity<CardVerificationResponse> cardVerification(CardVerificationRequest cardVerificationRequest) {
-        return new ResponseEntity<>(
-                bankomatCamundaProcessService.cardVerification(cardVerificationRequest),
-                HttpStatus.ACCEPTED);
+    public ResponseEntity<Void> cardVerification(CardVerificationRequest cardVerificationRequest) {
+        bankomatCamundaProcessService.cardVerification(cardVerificationRequest);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @Override
-    public ResponseEntity<WithdrawalResponse> withdrawal(WithdrawalRequest withdrawalRequest) {
-        return new ResponseEntity<>(
-                bankomatCamundaProcessService.withdrawal(withdrawalRequest),
-                HttpStatus.ACCEPTED);
+    public ResponseEntity<Void> withdrawal(WithdrawalRequest withdrawalRequest) {
+        bankomatCamundaProcessService.withdrawal(withdrawalRequest);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @Override
@@ -46,5 +46,17 @@ public class BankomatBff implements BankomatBffApiDelegate {
         return new ResponseEntity<>(
                 atmService.getAllAtms(),
                 HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<CardVerificationResponse> cardVerificationCallback(String transactionId) {
+        return new ResponseEntity<>(
+                callbackService.cardVerificationCallback(transactionId),
+                HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<WithdrawalResponse> withdrawalCallback(String transactionId) {
+        return BankomatBffApiDelegate.super.withdrawalCallback(transactionId);
     }
 }

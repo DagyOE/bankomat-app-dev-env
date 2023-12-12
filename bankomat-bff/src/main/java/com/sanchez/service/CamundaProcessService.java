@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.camunda.bpm.engine.RuntimeService;
 import org.camunda.bpm.engine.rest.dto.runtime.ProcessInstanceDto;
+import org.camunda.bpm.engine.runtime.ProcessInstance;
 import org.camunda.bpm.engine.runtime.ProcessInstanceWithVariables;
 import org.springframework.stereotype.Service;
 
@@ -20,10 +21,10 @@ public class CamundaProcessService {
 
     private final RuntimeService runtimeService;
 
-    public CardVerificationResponse cardVerification(CardVerificationRequest cardVerificationRequest) {
+    public void cardVerification(CardVerificationRequest cardVerificationRequest) {
         log.info("Starting card verification process with transactionId: {}", cardVerificationRequest.getTransactionId());
 
-        ProcessInstanceWithVariables processInstance = runtimeService
+        ProcessInstance processInstance = runtimeService
                 .createProcessInstanceByKey(CamundaProcess.CARD_VERIFICATION.getKey())
                 .businessKey(cardVerificationRequest.getTransactionId())
                 .setVariable(Variable.CARD_NUMBER.getKey(), cardVerificationRequest.getCardNumber())
@@ -32,14 +33,10 @@ public class CamundaProcessService {
                 .setVariable(Variable.PIN.getKey(), cardVerificationRequest.getPin())
                 .setVariable(Variable.TRANSACTION_ID.getKey(), cardVerificationRequest.getTransactionId())
                 .setVariable(Variable.ATM_ID.getKey(), cardVerificationRequest.getAtmId())
-                .setVariable(Variable.ACCOUNT_RESPONSE.getKey(), null)
-                .setVariable(Variable.RESPONSE_MESSAGE.getKey(), null)
-                .executeWithVariablesInReturn();
+                .execute();
 
         ProcessInstanceDto response = ProcessInstanceDto.fromProcessInstance(processInstance);
         log.info("Card verification process: {}", response);
-
-        return processInstance.getVariables().getValue("buildedResponseMessage", CardVerificationResponse.class);
     }
 
     public WithdrawalResponse withdrawal(WithdrawalRequest withdrawalRequest) {
