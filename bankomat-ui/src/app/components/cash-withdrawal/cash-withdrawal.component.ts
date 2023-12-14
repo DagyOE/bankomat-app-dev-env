@@ -54,7 +54,6 @@ export class CashWithdrawalComponent implements OnInit {
 
   withdrawalMoney() {
     this.withdrawalRequest.transactionId = uuid();
-    this.withdrawalRequest.requestTime = new Date();
     this.withdrawalRequest.currency = 'CZK';
 
     this.processesService

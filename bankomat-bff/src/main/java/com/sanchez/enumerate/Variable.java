@@ -8,8 +8,6 @@ public enum Variable {
     TRANSACTION_ID("transactionId"),
     TOKEN("token"),
     ACCOUNT_ID("accountId"),
-    RESPONSE_MESSAGE("responseMessage"),
-    ACCOUNT_RESPONSE("accountResponse"),
     AMOUNT("amount"),
     CURRENCY("currency"),
     ATM_ID("atmId"),

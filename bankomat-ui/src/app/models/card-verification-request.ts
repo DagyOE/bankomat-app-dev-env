@@ -5,5 +5,4 @@ export class CardVerificationRequest {
   pin?: string;
   transactionId?: string;
   atmId?: string;
-  requestTime?: Date;
 }

@@ -2,10 +2,11 @@
 @import "./assets/sass/abstracts/variables";
 
 @import "./assets/sass/base/base";
+@import "./assets/sass/base/loader";
 @import "./assets/sass/base/typography";
 @import "./assets/sass/base/animations";
 
-@import "./assets/sass/components/account-verification";
+@import "./assets/sass/components/card-verification";
 @import "./assets/sass/components/button";
 
 @import "./assets/sass/layout/grid";

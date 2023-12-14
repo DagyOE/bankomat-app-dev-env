@@ -1,32 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0fr9mxs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.2.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0fr9mxs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.17.0">
   <bpmn:process id="CardEject" name="Card Eject" isExecutable="true" camunda:versionTag="1.0.0" camunda:historyTimeToLive="180">
     <bpmn:startEvent id="start" name="Start">
       <bpmn:outgoing>Flow_1ixy8vr</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:endEvent id="end" name="End">
-      <bpmn:incoming>Flow_1twxzqg</bpmn:incoming>
+      <bpmn:incoming>Flow_1550i3v</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:serviceTask id="RemoveCardFromAtm" name="Remove card from ATM" camunda:asyncBefore="true" camunda:expression="${accountServiceImpl.removeTokenFromAccount(execution)}">
       <bpmn:incoming>Flow_1ixy8vr</bpmn:incoming>
       <bpmn:outgoing>Flow_1twxzqg</bpmn:outgoing>
     </bpmn:serviceTask>
-    <bpmn:sequenceFlow id="Flow_1twxzqg" sourceRef="RemoveCardFromAtm" targetRef="end" />
+    <bpmn:sequenceFlow id="Flow_1twxzqg" sourceRef="RemoveCardFromAtm" targetRef="Activity_1mqx724" />
     <bpmn:sequenceFlow id="Flow_1ixy8vr" sourceRef="start" targetRef="RemoveCardFromAtm" />
+    <bpmn:serviceTask id="Activity_1mqx724" name="Send Signal To FE" camunda:asyncBefore="true" camunda:expression="${messageService.notifyAfterEndFlow(execution)}">
+      <bpmn:incoming>Flow_1twxzqg</bpmn:incoming>
+      <bpmn:outgoing>Flow_1550i3v</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1550i3v" sourceRef="Activity_1mqx724" targetRef="end" />
   </bpmn:process>
   <bpmn:error id="Error_05fekdh" name="ExpiredToken" errorCode="ExpiredToken" />
   <bpmn:error id="Error_0v6gtnm" name="LowAccountBalance" errorCode="LowAccountBalance" />
   <bpmn:error id="Error_0pol3cp" name="LowAtmBalance" errorCode="LowAtmBalance" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="CardEject">
-      <bpmndi:BPMNEdge id="Flow_1ixy8vr_di" bpmnElement="Flow_1ixy8vr">
-        <di:waypoint x="195" y="167" />
-        <di:waypoint x="250" y="167" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1twxzqg_di" bpmnElement="Flow_1twxzqg">
-        <di:waypoint x="350" y="167" />
-        <di:waypoint x="412" y="167" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="start">
         <dc:Bounds x="159" y="149" width="36" height="36" />
         <bpmndi:BPMNLabel>
@@ -37,11 +34,26 @@
         <dc:Bounds x="250" y="127" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_0x6ir2l_di" bpmnElement="end">
-        <dc:Bounds x="412" y="149" width="36" height="36" />
+        <dc:Bounds x="572" y="149" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="420" y="125" width="20" height="14" />
+          <dc:Bounds x="580" y="125" width="20" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1mqx724_di" bpmnElement="Activity_1mqx724">
+        <dc:Bounds x="410" y="127" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1twxzqg_di" bpmnElement="Flow_1twxzqg">
+        <di:waypoint x="350" y="167" />
+        <di:waypoint x="410" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ixy8vr_di" bpmnElement="Flow_1ixy8vr">
+        <di:waypoint x="195" y="167" />
+        <di:waypoint x="250" y="167" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1550i3v_di" bpmnElement="Flow_1550i3v">
+        <di:waypoint x="510" y="167" />
+        <di:waypoint x="572" y="167" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

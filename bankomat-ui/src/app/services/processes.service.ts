@@ -26,6 +26,11 @@ export class ProcessesService {
     return this.http.post(url, cardVerificationRequest);
   }
 
+  cardVerificationCallback(transactionId: string | undefined) {
+    const url = `${this.BASE_URL}/bankomat-bff/v1/bff-api/callback/card-verification/${transactionId}`;
+    return this.http.get(url);
+  }
+
   withdrawal(withdrawalRequest: WithdrawalRequest) {
     const url = `${this.BASE_URL}/bankomat-bff/v1/bff-api/withdrawal/`;
     return this.http.post(url, withdrawalRequest);

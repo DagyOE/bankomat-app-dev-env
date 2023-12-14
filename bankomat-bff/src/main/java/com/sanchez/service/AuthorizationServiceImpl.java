@@ -1,6 +1,5 @@
 package com.sanchez.service;
 
-import com.sanchez.dtos.AccountResponseDto;
 import com.sanchez.enumerate.Variable;
 import com.sanchez.model.Account;
 import com.sanchez.model.Card;

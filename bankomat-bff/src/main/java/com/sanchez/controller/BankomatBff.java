@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -35,6 +36,33 @@ public class BankomatBff implements BankomatBffApiDelegate {
     }
 
     @Override
+    public ResponseEntity<Void> cardEject(CardEjectRequest cardEjectRequest) {
+        bankomatCamundaProcessService.cardEject(cardEjectRequest);
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @Override
+    public ResponseEntity<CallbackCardVerification> cardVerificationCallback(String transactionId) {
+        return new ResponseEntity<>(
+                callbackService.cardVerificationCallback(transactionId),
+                HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<CallbackWithdrawal> withdrawalCallback(String transactionId) {
+        return new ResponseEntity<>(
+                callbackService.withdrawalCallback(transactionId),
+                HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<CallbackCardEject> cardEjectCallback(String transactionId) {
+        return new ResponseEntity<>(
+                callbackService.cardEjectCallback(transactionId),
+                HttpStatus.OK);
+    }
+
+    @Override
     public ResponseEntity<List<AccountResponse>> getAllAccounts() {
         return new ResponseEntity<>(
                 accountService.getAllAccounts(),
@@ -46,17 +74,5 @@ public class BankomatBff implements BankomatBffApiDelegate {
         return new ResponseEntity<>(
                 atmService.getAllAtms(),
                 HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<CardVerificationResponse> cardVerificationCallback(String transactionId) {
-        return new ResponseEntity<>(
-                callbackService.cardVerificationCallback(transactionId),
-                HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<WithdrawalResponse> withdrawalCallback(String transactionId) {
-        return BankomatBffApiDelegate.super.withdrawalCallback(transactionId);
     }
 }

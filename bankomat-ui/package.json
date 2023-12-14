@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "compile:sass": "node-sass src/styles.scss src/styles.css -w"
+    "compile:sass": "sass src/styles.scss src/styles.css -w"
   },
   "private": true,
   "dependencies": {
@@ -24,6 +24,7 @@
     "@stomp/stompjs": "^7.0.0",
     "@types/uuid": "^9.0.7",
     "rxjs": "~7.8.0",
+    "sass": "^1.69.5",
     "sockjs-client": "^1.6.1",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0"

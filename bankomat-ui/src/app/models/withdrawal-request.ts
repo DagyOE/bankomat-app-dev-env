@@ -5,5 +5,4 @@ export class WithdrawalRequest {
   amount?: number;
   currency?: string;
   transactionId?: string;
-  requestTime?: Date;
 }

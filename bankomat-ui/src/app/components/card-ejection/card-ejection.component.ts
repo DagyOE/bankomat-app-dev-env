@@ -46,8 +46,8 @@ export class CardEjectionComponent implements OnInit {
       this.message =
         'Start card ejecting from atm, thank you for your transaction';
     } else {
-      this.status = this.withdrawalResponse.status;
-      this.message = this.withdrawalResponse.message;
+      // this.status = this.withdrawalResponse.status;
+      // this.message = this.withdrawalResponse.message;
     }
 
     setTimeout(() => {

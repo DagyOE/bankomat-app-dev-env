@@ -69,6 +69,34 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProblemDetails'
+  /bankomat-bff/v1/bff-api/card-eject/:
+    post:
+      tags:
+        - public
+      summary: Eject card from atm
+      operationId: cardEject
+      parameters: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardEjectRequest'
+      responses:
+        '202':
+          description: Successful operation
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
   /bankomat-bff/v1/bff-api/callback/card-verification/{transactionId}:
     get:
       tags:
@@ -89,7 +117,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CardVerificationResponse'
+                $ref: '#/components/schemas/CallbackCardVerification'
         '400':
           description: Bad Request
           content:
@@ -122,7 +150,40 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WithdrawalResponse'
+                $ref: '#/components/schemas/CallbackWithdrawal'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /bankomat-bff/v1/bff-api/callback/card-eject/{transactionId}:
+    get:
+      tags:
+        - callbacks
+      summary: Callback after card eject process
+      operationId: cardEjectCallback
+      parameters:
+        - name: transactionId
+          in: path
+          description: ID of transaction
+          required: true
+          schema:
+            type: string
+            example: 3cca68c6-b44f-40ea-9a11-973291ee4b26
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CallbackCardEject'
         '400':
           description: Bad Request
           content:
@@ -191,6 +252,57 @@ paths:
                 $ref: '#/components/schemas/ProblemDetails'
 components:
   schemas:
+    CallbackCardVerification:
+      type: object
+      properties:
+        isCompleted:
+          type: boolean
+          example: true
+        error:
+          $ref: '#/components/schemas/Error'
+        response:
+          $ref: '#/components/schemas/CardVerificationResponse'
+    CallbackWithdrawal:
+      type: object
+      properties:
+        isCompleted:
+          type: boolean
+          example: true
+        error:
+          $ref: '#/components/schemas/Error'
+        response:
+          $ref: '#/components/schemas/WithdrawalResponse'
+    CallbackCardEject:
+      type: object
+      properties:
+        isCompleted:
+          type: boolean
+          example: true
+        error:
+          $ref: '#/components/schemas/Error'
+        response:
+          $ref: '#/components/schemas/CardEjectResponse'
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Card Expiration date is different"
+    CardEjectRequest:
+      type: object
+      properties:
+        accountId:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+        transactionId:
+          type: string
+          example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+    CardEjectResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Card ejection is completed"
     CardVerificationRequest:
       type: object
       properties:
@@ -212,10 +324,6 @@ components:
         atmId:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
-        requestTime:
-          type: string
-          format: date-time
-          example: 2023-11-30 15:25:53.423
     CardVerificationResponse:
       type: object
       properties:
@@ -225,19 +333,6 @@ components:
         token:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
-        status:
-          type: string
-          enum:
-            - "success"
-            - "pending"
-            - "cancelled"
-            - "insufficientFunds"
-            - "invalidCard"
-            - "timeout"
-            - "networkError"
-        message:
-          type: string
-          example: "Card Expiration date is different"
     WithdrawalRequest:
       type: object
       properties:
@@ -260,23 +355,9 @@ components:
         transactionId:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
-        requestTime:
-          type: string
-          format: date-time
-          example: 2023-11-30 15:25:53.423
     WithdrawalResponse:
       type: object
       properties:
-        status:
-          type: string
-          enum:
-            - "success"
-            - "pending"
-            - "cancelled"
-            - "insufficientFunds"
-            - "invalidCard"
-            - "timeout"
-            - "networkError"
         message:
           type: string
           example: "Transaction completed successfully"
