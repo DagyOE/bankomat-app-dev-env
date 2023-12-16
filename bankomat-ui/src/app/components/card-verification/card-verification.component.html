@@ -34,36 +34,10 @@
     </form>
   </div>
 
-  <div *ngIf="isProcessing"
-       class="modal-overlay"
-       [@incomingAnimation]>
-    <div class="modal">
-      <img src="./assets/img/small-logo.png" alt="Small Logo" class="logo">
-      <p>We are currently processing your request</p>
-      <div class="loader"></div>
-    </div>
-  </div>
-
-  <div *ngIf="successProcessing"
-       class="modal-overlay"
-       [@incomingAnimation]>
-    <div class="modal">
-      <img src="./assets/img/small-logo.png" alt="Small Logo" class="logo">
-      <p>We have processed your request and it was successful</p>
-      <!--  OK ICON  -->
-      OK
-    </div>
-  </div>
-
-  <div *ngIf="failedProcessing"
-       class="modal-overlay"
-       [@incomingAnimation]>
-    <div class="modal">
-      <img src="./assets/img/small-logo.png" alt="Small Logo" class="logo">
-      <p>Your request was unsuccessful:</p>
-      <p>{{ callbackResponse.error?.message }}</p>
-      <!--  BAD ICON  -->
-      BAD
-    </div>
-  </div>
+  <app-modal-window
+    [isProcessing]="isProcessing"
+    [successProcessing]="successProcessing"
+    [failedProcessing]="failedProcessing"
+    [callbackResponse]="callbackResponse">
+  </app-modal-window>
 </div>

@@ -1,19 +1,33 @@
-<div class="row" [@incomingAnimation]>
-  <h1>Welcome in ATM machine</h1>
-  <div class="col-1-2">
-    <a
-      routerLink="withdrawal"
-      routerLinkActive="text-purple-600"
-      class="btn btn--white btn--animated"
-      >Withdrawal</a
-    >
+<div class="row" >
+  <div class="container" [@incomingAnimation]>
+    <div class="col-1-2">
+      <a
+        (click)="startWithdrawal()"
+        class="btn btn--white btn--animated"
+        >Withdrawal</a
+      >
+    </div>
+    <div class="col-1-2">
+      <a
+        (click)="startEjection()"
+        class="btn btn--white btn--animated"
+        >Eject Card</a
+      >
+    </div>
   </div>
-  <div class="col-1-2">
-    <a
-      routerLink="card-ejection"
-      routerLinkActive="text-purple-600"
-      class="btn btn--white btn--animated"
-      >End process</a
-    >
-  </div>
+
+  <app-modal-window
+    [isProcessing]="isProcessing"
+    [successProcessing]="successProcessing"
+    [failedProcessing]="failedProcessing"
+    [callbackResponse]="callbackResponse">
+  </app-modal-window>
+
+  <app-cash-withdrawal
+    [showWithdrawal] = "showWithdrawal"
+    [accountId]="accountId"
+    [token]="token"
+    [atmId]="atmId"
+    (closeWithdrawal)="showWithdrawal=false">
+  </app-cash-withdrawal>
 </div>

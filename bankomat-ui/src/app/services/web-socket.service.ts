@@ -24,7 +24,6 @@ export class WebSocketService {
 
     this.client.onConnect = (frame) => {
       this.client.subscribe('/topic/processStatus', (message: IMessage) => {
-        console.log("Message from server: ", message.body);
         this.messageSubject.next(message.body);
       });
     };

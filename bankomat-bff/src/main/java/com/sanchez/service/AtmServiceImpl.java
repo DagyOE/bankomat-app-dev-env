@@ -36,7 +36,7 @@ public class AtmServiceImpl {
 
         if (amount > atm.getBalance()) {
             log.info("Throwing error \"Insufficient funds in atm\"");
-            execution.setVariable(Variable.ERROR_MESSAGE.getKey(), "Token has expired");
+            execution.setVariable(Variable.ERROR_MESSAGE.getKey(), "Insufficient funds in atm");
             throw new BpmnError("LowAtmBalance");
         }
 

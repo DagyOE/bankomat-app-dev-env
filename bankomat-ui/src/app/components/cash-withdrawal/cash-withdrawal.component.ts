@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import { Atm } from 'src/app/models/atm';
 import { WithdrawalRequest } from 'src/app/models/withdrawal-request';
 import { WithdrawalResponse } from 'src/app/models/withdrawal-response';
@@ -6,6 +6,9 @@ import { trigger, style, animate, transition } from '@angular/animations';
 import { v4 as uuid } from 'uuid';
 import { ProcessesService } from 'src/app/services/processes.service';
 import { Router } from '@angular/router';
+import {CallbackResponse} from "../../models/callback-response";
+import {Subscription} from "rxjs";
+import {WebSocketService} from "../../services/web-socket.service";
 
 @Component({
   selector: 'app-cash-withdrawal',
@@ -35,36 +38,71 @@ import { Router } from '@angular/router';
     ]),
   ],
 })
-export class CashWithdrawalComponent implements OnInit {
-  showCardEjectionComponent: boolean = false;
+export class CashWithdrawalComponent implements OnDestroy{
 
-  withdrawalResponse: WithdrawalResponse = new WithdrawalResponse();
+  @Input() showWithdrawal?: boolean;
+  @Input() accountId?: string;
+  @Input() token?: string;
+  @Input() atmId?: string;
+  @Output() closeWithdrawal = new EventEmitter<void>();
+  private messageSubscription!: Subscription;
+  callbackResponse: CallbackResponse = new CallbackResponse();
   withdrawalRequest: WithdrawalRequest = new WithdrawalRequest();
+  isProcessing = false;
+  successProcessing = false;
+  failedProcessing = false;
 
   constructor(
     private processesService: ProcessesService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private webSocket: WebSocketService
+  ) {
+    this.messageSubscription = this.webSocket.getMessage().subscribe((message: string) => {
+      if (message.includes("completed:" + this.withdrawalRequest.transactionId)) {
+        setTimeout(() => {
+          this.processesService.withdrawalCallback(this.withdrawalRequest.transactionId)
+            .subscribe((data: CallbackResponse) => {
+              this.callbackResponse = data;
+              if (this.callbackResponse.isCompleted) {
+                this.isProcessing = false;
+                this.successProcessing = true;
+                setTimeout(() => {
+                  this.successProcessing = false;
+                  this.router.navigate(['']);
+                }, 3000);
+              } else {
+                this.isProcessing = false;
+                this.failedProcessing = true;
+                setTimeout(() => {
+                  this.failedProcessing = false;
+                  this.router.navigate(['']);
+                }, 3000);
+              }
+            });
+        }, 3000);
+      }
+    });
+  }
 
-  ngOnInit(): void {
-    this.withdrawalRequest.accountId = localStorage.getItem('accountId')!;
-    this.withdrawalRequest.atmId = localStorage.getItem('atmId')!;
-    this.withdrawalRequest.token = localStorage.getItem('token')!;
+  ngOnDestroy() {
+    this.messageSubscription.unsubscribe();
   }
 
   withdrawalMoney() {
+    this.isProcessing = true;
+
+    this.withdrawalRequest.accountId = this.accountId;
+    this.withdrawalRequest.atmId = this.atmId;
+    this.withdrawalRequest.token = this.token;
     this.withdrawalRequest.transactionId = uuid();
     this.withdrawalRequest.currency = 'CZK';
 
     this.processesService
       .withdrawal(this.withdrawalRequest)
-      .subscribe((data) => {
-        this.withdrawalResponse = data;
-        console.log(this.withdrawalResponse);
-        this.showCardEjectionComponent = true;
-        setTimeout(() => {
-          this.router.navigate(['']);
-        }, 5000);
-      });
+      .subscribe();
+  }
+
+  close() {
+    this.closeWithdrawal.emit();
   }
 }

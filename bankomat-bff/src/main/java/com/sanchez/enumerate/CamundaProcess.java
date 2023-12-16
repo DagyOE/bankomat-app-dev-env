@@ -2,7 +2,8 @@ package com.sanchez.enumerate;
 
 public enum CamundaProcess {
     CARD_VERIFICATION("CardVerification"),
-    WITHDRAWAL("Withdrawal");
+    WITHDRAWAL("Withdrawal"),
+    CARD_EJECT("CardEject");
 
     private String key;
 

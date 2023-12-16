@@ -5,6 +5,7 @@ import { Atm } from '../models/atm';
 import { CardVerificationResponse } from '../models/card-verification-response';
 import { CardVerificationRequest } from '../models/card-verification-request';
 import { WithdrawalRequest } from '../models/withdrawal-request';
+import {CardEjectRequest} from "../models/card-eject-request";
 
 @Injectable({
   providedIn: 'root',
@@ -34,5 +35,20 @@ export class ProcessesService {
   withdrawal(withdrawalRequest: WithdrawalRequest) {
     const url = `${this.BASE_URL}/bankomat-bff/v1/bff-api/withdrawal/`;
     return this.http.post(url, withdrawalRequest);
+  }
+
+  withdrawalCallback(transactionId: string | undefined) {
+    const url = `${this.BASE_URL}/bankomat-bff/v1/bff-api/callback/withdrawal/${transactionId}`;
+    return this.http.get(url);
+  }
+
+  cardEject(cardEjectRequest: CardEjectRequest): Observable<CardVerificationResponse> {
+    const url = `${this.BASE_URL}/bankomat-bff/v1/bff-api/card-eject/`;
+    return this.http.post(url, cardEjectRequest);
+  }
+
+  cardEjectCallback(transactionId: string | undefined) {
+    const url = `${this.BASE_URL}/bankomat-bff/v1/bff-api/callback/card-eject/${transactionId}`;
+    return this.http.get(url);
   }
 }

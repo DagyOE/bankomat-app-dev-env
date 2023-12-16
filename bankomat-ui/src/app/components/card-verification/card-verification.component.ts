@@ -8,6 +8,8 @@ import { trigger, style, animate, transition } from '@angular/animations';
 import {WebSocketService} from "../../services/web-socket.service";
 import {Subscription} from "rxjs";
 import {CallbackResponse} from "../../models/callback-response";
+import {DataService} from "../../services/data.service";
+import {CardVerificationResponse} from "../../models/card-verification-response";
 
 @Component({
   selector: 'app-card-verification',
@@ -15,7 +17,7 @@ import {CallbackResponse} from "../../models/callback-response";
   animations: [
     trigger('incomingAnimation', [
       transition(':enter', [
-        style({ opacity: 0, scale: 0.5 }),
+        style({ opacity: 0, scale: 0 }),
         animate(
           '0.5s ease',
           style({
@@ -50,38 +52,31 @@ export class CardVerificationComponent implements OnInit, OnDestroy {
   constructor(
     private processesService: ProcessesService,
     private router: Router,
-    private webSocket: WebSocketService
+    private webSocket: WebSocketService,
+    private dataService: DataService
   ) {
-    this.messageSubscription = webSocket.getMessage().subscribe((message: string) => {
-      if (message.includes("completed")) {
-        console.log("DORAZIL SIGNAL A JE COMPLETED")
+    this.messageSubscription = this.webSocket.getMessage().subscribe((message: string) => {
+      if (message.includes("completed:" + this.cardVerification.transactionId)) {
         setTimeout(() => {
           processesService.cardVerificationCallback(this.cardVerification.transactionId)
-            .subscribe((data) => {
+            .subscribe((data: CallbackResponse) => {
               this.callbackResponse = data;
-
-              console.log("VOLANIE CALLBACKU JE SPAT: " + this.callbackResponse);
-
+              this.dataService.updateData({
+                'atmId': this.atm.atmId,
+                'data': this.callbackResponse.response
+              });
               if (this.callbackResponse.isCompleted) {
-                console.log("CALLBACK JE SUCCESS");
                 this.isProcessing = false;
                 this.successProcessing = true;
-
                 setTimeout(() => {
-                  console.log("VSTUP DO BANKOMATU");
                   this.successProcessing = false;
-                  this.isProcessing = false;
                   this.router.navigate(['atm']);
                 }, 3000);
               } else {
-                console.log("CALLBACK JE FAILED");
                 this.isProcessing = false;
                 this.failedProcessing = true;
-
                 setTimeout(() => {
-                  console.log("SKUS ZNOVA");
                   this.failedProcessing = false;
-                  this.isProcessing = false;
                 }, 3000);
               }
             });
@@ -93,7 +88,6 @@ export class CardVerificationComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.processesService.getAtmId().subscribe((data: any[]) => {
       this.atm.atmId = data[0].id;
-      localStorage.setItem('atmId', this.atm.atmId!);
     });
   }
 
@@ -109,6 +103,5 @@ export class CardVerificationComponent implements OnInit, OnDestroy {
     this.processesService
       .cardVerification(this.cardVerification)
       .subscribe();
-    console.log("ODOSLANY REQUEST A ODSTARTOVANY CAMUNDA FLOW")
   }
 }

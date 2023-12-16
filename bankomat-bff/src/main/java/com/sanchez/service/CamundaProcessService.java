@@ -54,16 +54,16 @@ public class CamundaProcessService {
     }
 
     public void cardEject(CardEjectRequest cardEjectRequest) {
-        log.info("Starting withdrawal process with transactionId: {}", cardEjectRequest.getTransactionId());
+        log.info("Starting card ejection process with transactionId: {}", cardEjectRequest.getTransactionId());
 
         ProcessInstance processInstance = runtimeService
-                .createProcessInstanceByKey(CamundaProcess.WITHDRAWAL.getKey())
+                .createProcessInstanceByKey(CamundaProcess.CARD_EJECT.getKey())
                 .businessKey(cardEjectRequest.getTransactionId())
                 .setVariable(Variable.ACCOUNT_ID.getKey(), cardEjectRequest.getAccountId())
                 .setVariable(Variable.TRANSACTION_ID.getKey(), cardEjectRequest.getTransactionId())
                 .execute();
 
         ProcessInstanceDto response = ProcessInstanceDto.fromProcessInstance(processInstance);
-        log.info("Withdrawal process: {}", response);
+        log.info("Card ejection process: {}", response);
     }
 }

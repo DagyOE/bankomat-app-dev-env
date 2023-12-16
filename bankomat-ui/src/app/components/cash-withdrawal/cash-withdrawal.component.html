@@ -1,23 +1,28 @@
 <div
-  *ngIf="!showCardEjectionComponent; else cardEjectionComponent"
-  class="row"
-  [@incomingAnimation]
+  class="withdrawal-overlay"
+  *ngIf="showWithdrawal"
 >
-  <h1>Withdrawal money</h1>
-  <form (submit)="withdrawalMoney()" class="card-form">
-    <label> Amount </label>
-    <input
-      [(ngModel)]="withdrawalRequest.amount"
-      type="number"
-      min="0"
-      placeholder="0"
-      name="cardNumber"
-    />
-    <button type="submit">Withdrawal</button>
-  </form>
+  <div class="withdrawal-modal"
+       [@incomingAnimation]>
+    <h1>Withdrawal money</h1>
+    <form (submit)="withdrawalMoney()" class="card-form-withdrawal">
+      <label> Amount </label>
+      <input
+        [(ngModel)]="withdrawalRequest.amount"
+        type="number"
+        min="0"
+        placeholder="0"
+        name="cardNumber"
+      />
+      <button type="submit">Withdrawal</button>
+    </form>
+    <button (click)="close()">Close</button>
+  </div>
 </div>
-<ng-template #cardEjectionComponent>
-  <app-card-ejection
-    [withdrawalResponse]="withdrawalResponse"
-  ></app-card-ejection>
-</ng-template>
+
+<app-modal-window
+  [isProcessing]="isProcessing"
+  [successProcessing]="successProcessing"
+  [failedProcessing]="failedProcessing"
+  [callbackResponse]="callbackResponse">
+</app-modal-window>
