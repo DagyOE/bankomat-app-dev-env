@@ -294,9 +294,11 @@ components:
         accountId:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
         transactionId:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
     CardEjectResponse:
       type: object
       properties:
@@ -309,52 +311,66 @@ components:
         cardNumber:
           type: string
           example: "1234567890123456"
+          pattern: ^[0-9]{16}$
         expirationDate:
           type: string
           example: "12/25"
+          pattern: ^(0[1-9]|1[0-2])\/([0-9]{2})$
         cvv:
           type: string
           example: "123"
+          pattern: ^[0-9]{3}$
         pin:
           type: string
           example: "9876"
+          pattern: ^[0-9]{4}$
         transactionId:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
         atmId:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
     CardVerificationResponse:
       type: object
       properties:
         accountId:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
         token:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
     WithdrawalRequest:
       type: object
       properties:
         accountId:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
         atmId:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
         token:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
         amount:
           type: number
           format: float
           example: 100.0
+          pattern: ^\s*\d+(\.\d+)?\s*$
         currency:
           type: string
           example: "CZK"
+          pattern: ^[A-Z]{3}$
         transactionId:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
     WithdrawalResponse:
       type: object
       properties:
@@ -375,9 +391,11 @@ components:
           type: number
           format: float
           example: "1000.10"
+          pattern: ^\s*\d+(\.\d+)?\s*$
         token:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
         createdAt:
           type: string
           format: date-time
@@ -406,18 +424,23 @@ components:
         id:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
         cardNumber:
           type: string
           example: "1234567890123456"
+          pattern: ^[0-9]{16}$
         expirationDate:
           type: string
           example: "12/25"
+          pattern: ^(0[1-9]|1[0-2])\/([0-9]{2})$
         cvv:
           type: string
           example: "123"
+          pattern: ^[0-9]{3}$
         pin:
           type: string
           example: "9876"
+          pattern: ^[0-9]{4}$
         createdAt:
           type: string
           format: date-time
@@ -444,6 +467,7 @@ components:
           type: number
           format: float
           example: "1000.10"
+          pattern: ^\s*\d+(\.\d+)?\s*$
         AccountTransactionResponseList:
           type: array
           items:
@@ -458,18 +482,22 @@ components:
         id:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
         amount:
           type: number
           format: float
           example: "1000.10"
+          pattern: ^\s*\d+(\.\d+)?\s*$
         balanceBefore:
           type: number
           format: float
           example: "1000.10"
+          pattern: ^\s*\d+(\.\d+)?\s*$
         balanceAfter:
           type: number
           format: float
           example: "1000.10"
+          pattern: ^\s*\d+(\.\d+)?\s*$
         status:
           type: string
           enum:
@@ -490,6 +518,7 @@ components:
         id:
           type: string
           example: "3cca68c6-b44f-40ea-9a11-973291ee4b26"
+          pattern: ^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$
         status:
           type: string
           enum:
